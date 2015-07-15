@@ -1,0 +1,5 @@
+Release/
+*.opensdf
+*.sdf
+Debug/
+*.sln
