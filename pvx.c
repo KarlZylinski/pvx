@@ -30,6 +30,8 @@ static unsigned g_window_height;
 static Shape g_shapes[MAX_SHAPES];
 static unsigned g_free_shapes[MAX_SHAPES];
 
+static const unsigned floats_per_vertex = 5;
+
 static LoadedFile load_file(const char* filename)
 {
     LoadedFile lf = {0};
@@ -58,6 +60,9 @@ static GLuint compile_glsl(const char* shader_source, GLenum shader_type)
     GLuint result = glCreateShader(shader_type);
     glShaderSource(result, 1, &shader_source, NULL);
     glCompileShader(result);
+    static char buffer[512];
+    glGetShaderInfoLog(result, 512, NULL, buffer);
+    printf("%s", buffer);
     return result;
 }
 
@@ -153,7 +158,6 @@ static void clear()
 
 static void flip()
 {
-    glUseProgram(g_shader);
     SwapBuffers(g_device_context);
 }
 
@@ -175,18 +179,21 @@ static Handle add_shape(float* verts, int n)
     GLuint geometry_handle;
     glGenBuffers(1, &geometry_handle);
     glBindBuffer(GL_ARRAY_BUFFER, geometry_handle);
-    glBufferData(GL_ARRAY_BUFFER, n * sizeof(float), verts, GL_STATIC_DRAW);
-    Shape shape = { geometry_handle, n / 2 };
+    glBufferData(GL_ARRAY_BUFFER, n * floats_per_vertex * sizeof(float), verts, GL_STATIC_DRAW);
+    Shape shape = { geometry_handle, n };
     g_shapes[handle] = shape;
     return handle;
 }
 
 static void draw_shape(Handle handle)
 {
+    glUseProgram(g_shader);
     Shape* shape = g_shapes + handle;
     glBindBuffer(GL_ARRAY_BUFFER, shape->geometry_handle);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, floats_per_vertex * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, floats_per_vertex * sizeof(float), (void*)(2 * sizeof(float)));
     glDrawArrays(GL_TRIANGLE_FAN, 0, shape->count);
 }
 
@@ -229,17 +236,30 @@ static int pvx_is_window_open(lua_State* L)
 static int pvx_add_shape(lua_State* L)
 {
     static float verts[256];
-    assert(lua_istable(L, 1));
-    int n = luaL_getn(L, 1);
+    float r = (float)luaL_checknumber(L, 1);
+    float g = (float)luaL_checknumber(L, 2);
+    float b = (float)luaL_checknumber(L, 3);
+    assert(lua_istable(L, 4));
+    int n = luaL_getn(L, 4);
+
+    int vertex_counter = 0;
 
     for (int i = 1; i <= n; ++i)
     {
-        lua_rawgeti(L, -1, i);
-        verts[i - 1] = (float)lua_tonumber(L, -1);
+        lua_rawgeti(L, 4, i);
+        verts[vertex_counter++] = (float)lua_tonumber(L, -1);
+
+        if (i % 2 == 0)
+        {
+            verts[vertex_counter++] = r;
+            verts[vertex_counter++] = g;
+            verts[vertex_counter++] = b;
+        }
+
         lua_pop(L, 1);
     }
 
-    lua_pushnumber(L, add_shape(verts, n));
+    lua_pushnumber(L, add_shape(verts, n / 2));
     return 1;
 }
 
