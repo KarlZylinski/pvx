@@ -78,7 +78,7 @@ static GLuint load_shader(const char* vertex_source, const char* fragment_source
     return program;
 }
 
-static void set_projection_matrix(unsigned window_width, unsigned window_height)
+static void set_window_size(unsigned window_width, unsigned window_height)
 {
     memset(g_projection_matrix, 0, sizeof(g_projection_matrix));
     float near_plane = -1;
@@ -90,6 +90,7 @@ static void set_projection_matrix(unsigned window_width, unsigned window_height)
     g_projection_matrix[13] = 1;
     g_projection_matrix[14] = (near_plane + far_plane) / (near_plane - far_plane);
     g_projection_matrix[15] = 1;
+    glViewport(0, 0, window_width, window_height);
 }
 
 static LRESULT CALLBACK window_proc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
@@ -98,10 +99,7 @@ static LRESULT CALLBACK window_proc(HWND hwnd, UINT message, WPARAM wparam, LPAR
     {
     case WM_SIZE:
     {
-        WORD width = LOWORD(lparam);
-        WORD height = HIWORD(lparam);
-        set_projection_matrix(width, height);
-        glViewport(0, 0, width, height);
+        set_window_size(LOWORD(lparam), HIWORD(lparam));
         return 0;
     }
     default:
@@ -139,7 +137,6 @@ static void init(const char* window_title, unsigned window_width, unsigned windo
         0, 0, 0
     };
 
-    set_projection_matrix(window_width, window_height);
     memset(g_free_shapes, 1, sizeof(g_free_shapes));
     wc.hInstance = h;
     wc.lpfnWndProc = window_proc;
@@ -164,6 +161,7 @@ static void init(const char* window_title, unsigned window_width, unsigned windo
     assert(fragment_shader.loaded);
     g_shader = load_shader(vertex_shader.data, fragment_shader.data);
     g_model_view_projection_matrix_location = glGetUniformLocation(g_shader, "model_view_projection_matrix");
+    set_window_size(window_width, window_height);
 }
 
 static void deinit()
@@ -197,7 +195,10 @@ static Handle get_free_shape_handle()
     for (unsigned i = 0; i < MAX_SHAPES; ++i)
     {
         if (g_free_shapes[i])
+        {
+            g_free_shapes[i] = 0;
             return i;
+        }
     }
 
     return (Handle)-1;
