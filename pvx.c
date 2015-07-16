@@ -181,8 +181,9 @@ static void process_events()
     }
 }
 
-static void clear()
+static void clear(float r, float g, float b)
 {
+	glClearColor(r, g, b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -346,7 +347,10 @@ static int pvx_draw_shape(lua_State* L)
 
 static int pvx_clear(lua_State* L)
 {
-    clear();
+	float r = (float)luaL_checknumber(L, 1);
+	float g = (float)luaL_checknumber(L, 2);
+	float b = (float)luaL_checknumber(L, 3);
+    clear(r, g, b);
     return 0;
 }
 
