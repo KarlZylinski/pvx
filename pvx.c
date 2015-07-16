@@ -148,7 +148,7 @@ static void init(const char* window_title, unsigned window_width, unsigned windo
     g_device_context = GetDC(g_window_handle);
     SetPixelFormat(g_device_context, ChoosePixelFormat(g_device_context, &pfd), &pfd);
     g_rendering_context = wglCreateContext(g_device_context);
-    wglMakeCurrent(g_device_context,g_rendering_context);
+    wglMakeCurrent(g_device_context, g_rendering_context);
     gl3wInit();
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -160,6 +160,7 @@ static void init(const char* window_title, unsigned window_width, unsigned windo
     LoadedFile fragment_shader = load_file("fragment_shader.glsl");
     assert(fragment_shader.loaded);
     g_shader = load_shader(vertex_shader.data, fragment_shader.data);
+	assert(glIsProgram(g_shader));
     g_model_view_projection_matrix_location = glGetUniformLocation(g_shader, "model_view_projection_matrix");
     set_window_size(window_width, window_height);
 }

@@ -57,7 +57,7 @@
     </Link>
     <Lib />
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)$(Configuration)\pvx.dll d:\projects\town</Command>
+      <Command>copy $(SolutionDir)$(Configuration)\pvx.dll c:\projects\town</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -80,7 +80,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)$(Configuration)\pvx.dll d:\projects\town</Command>
+      <Command>copy $(SolutionDir)$(Configuration)\pvx.dll c:\projects\town</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
