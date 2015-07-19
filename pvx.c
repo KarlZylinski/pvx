@@ -40,6 +40,7 @@ static unsigned g_mouse_x;
 static unsigned g_mouse_y;
 static int g_mouse_left_down;
 static int g_mouse_right_down;
+static int g_window_closed;
 
 static void mat_ident(float* out)
 {
@@ -166,6 +167,12 @@ static const char* key_from_windows_key_code(WPARAM key)
 static void key_down(int key)
 {
 	g_held_keys[key] = 1;
+
+	if (key == VK_ESCAPE)
+	{
+		CloseWindow(g_window_handle);
+		g_window_closed = 1;
+	}
 }
 
 static void key_up(int key)
@@ -227,8 +234,9 @@ static LRESULT CALLBACK window_proc(HWND hwnd, UINT message, WPARAM wparam, LPAR
     }
 }
 
-static void init(const char* window_title, unsigned window_width, unsigned window_height)
+static void init(const char* window_title, unsigned window_width, unsigned window_height, int fullscreen)
 {
+	g_window_closed = 0;
     HINSTANCE h = GetModuleHandle(NULL);
     WNDCLASS wc = {0};    
     GLuint vao;
@@ -267,7 +275,7 @@ static void init(const char* window_title, unsigned window_width, unsigned windo
     wc.hInstance = h;
     wc.lpfnWndProc = window_proc;
     wc.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);
-    wc.lpszClassName = window_title;
+	wc.lpszClassName = window_title;
     wc.style = CS_OWNDC;
     RegisterClass(&wc);
     g_window_handle = CreateWindow(window_title, window_title, WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, window_width + 2 * h_border_thickness,window_height + 2 * v_border_thickness + caption_thickness, 0, 0, h, 0);
@@ -292,6 +300,33 @@ static void init(const char* window_title, unsigned window_width, unsigned windo
     g_model_view_projection_matrix_location = glGetUniformLocation(g_shader, "model_view_projection_matrix");
     set_window_size(window_width, window_height);
 	wglGetProcAddress("wglSwapIntervalEXT")(-1);
+
+	if (fullscreen)
+	{
+		DEVMODE settings;
+		memset(&settings, 0, sizeof(settings));
+		settings.dmSize = sizeof(settings);
+		settings.dmPelsWidth = window_width;
+		settings.dmPelsHeight = window_height;
+		settings.dmBitsPerPel = 32;
+		settings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+		ChangeDisplaySettings(&settings, CDS_FULLSCREEN);
+
+		LONG ex_style = GetWindowLong(g_window_handle, GWL_EXSTYLE);
+		LONG style = GetWindowLong(g_window_handle, GWL_STYLE);
+
+		ex_style &= ~(WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE);
+		style &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
+
+		SetWindowLong(g_window_handle, GWL_EXSTYLE, ex_style);
+		SetWindowLong(g_window_handle, GWL_STYLE, style);
+
+		SetWindowPos(g_window_handle,
+			0,
+			0, 0,
+			window_width, window_height,
+			SWP_NOZORDER | SWP_FRAMECHANGED);
+	}
 }
 
 static void deinit()
@@ -403,16 +438,17 @@ static void move_view(float x, float y)
 
 static int is_window_open()
 {
-    return IsWindow(g_window_handle);
+    return IsWindow(g_window_handle) && g_window_closed != 1;
 }
 
 static int pvx_init(lua_State* L)
 {
     const char* window_title = luaL_checkstring(L, 1);
     unsigned window_width = (unsigned)luaL_checknumber(L, 2);
-    unsigned window_height = (unsigned)luaL_checknumber(L, 3);
-	init(window_title, window_width, window_height);
-	lua_pop(L, 3);
+	unsigned window_height = (unsigned)luaL_checknumber(L, 3);
+	int fullscreen = (unsigned)luaL_checkinteger(L, 4);
+	init(window_title, window_width, window_height, fullscreen);
+	lua_pop(L, 4);
     return 0;
 }
 
