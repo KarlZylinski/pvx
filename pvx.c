@@ -44,11 +44,11 @@ static int g_window_closed;
 
 static void mat_ident(float* out)
 {
-	memset(out, 0, 16 * sizeof(float));
-	out[0] = 1;
-	out[5] = 1;
-	out[10] = 1;
-	out[15] = 1;
+    memset(out, 0, 16 * sizeof(float));
+    out[0] = 1;
+    out[5] = 1;
+    out[10] = 1;
+    out[15] = 1;
 }
 
 static LoadedFile load_file(const char* filename)
@@ -100,84 +100,84 @@ static GLuint load_shader(const char* vertex_source, const char* fragment_source
 
 static void recalculate_projection_matrix()
 {
-	memset(g_projection_matrix, 0, sizeof(g_projection_matrix));
-	static const float near_plane = -1;
-	static const float far_plane = 1;
-	g_projection_matrix[0] = 2.0f / (g_window_width - 1.0f);
-	g_projection_matrix[5] = -2.0f / (g_window_height - 1.0f);
-	g_projection_matrix[10] = 2.0f / (far_plane / near_plane);
-	g_projection_matrix[12] = -1;
-	g_projection_matrix[13] = 1;
-	g_projection_matrix[14] = (near_plane + far_plane) / (near_plane - far_plane);
-	g_projection_matrix[15] = 1;
+    memset(g_projection_matrix, 0, sizeof(g_projection_matrix));
+    static const float near_plane = -1;
+    static const float far_plane = 1;
+    g_projection_matrix[0] = 2.0f / (g_window_width - 1.0f);
+    g_projection_matrix[5] = -2.0f / (g_window_height - 1.0f);
+    g_projection_matrix[10] = 2.0f / (far_plane / near_plane);
+    g_projection_matrix[12] = -1;
+    g_projection_matrix[13] = 1;
+    g_projection_matrix[14] = (near_plane + far_plane) / (near_plane - far_plane);
+    g_projection_matrix[15] = 1;
 }
 
 static void set_window_size(unsigned window_width, unsigned window_height)
 {
-	g_window_width = window_width;
-	g_window_height = window_height;
-	recalculate_projection_matrix();
+    g_window_width = window_width;
+    g_window_height = window_height;
+    recalculate_projection_matrix();
     glViewport(0, 0, window_width, window_height);
 }
 
 static int key_index_from_name(const char* key)
 {
-	if (strcmp(key, "space") == 0)
-	{
-		return VK_SPACE;
-	}
+    if (strcmp(key, "space") == 0)
+    {
+        return VK_SPACE;
+    }
 
-	if (strcmp(key, "up") == 0)
-	{
-		return VK_UP;
-	}
+    if (strcmp(key, "up") == 0)
+    {
+        return VK_UP;
+    }
 
-	if (strcmp(key, "down") == 0)
-	{
-		return VK_DOWN;
-	}
+    if (strcmp(key, "down") == 0)
+    {
+        return VK_DOWN;
+    }
 
-	if (strcmp(key, "left") == 0)
-	{
-		return VK_LEFT;
-	}
+    if (strcmp(key, "left") == 0)
+    {
+        return VK_LEFT;
+    }
 
-	if (strcmp(key, "right") == 0)
-	{
-		return VK_RIGHT;
-	}
+    if (strcmp(key, "right") == 0)
+    {
+        return VK_RIGHT;
+    }
 
-	return 0;
+    return 0;
 }
 
 static const char* key_from_windows_key_code(WPARAM key)
 {
-	switch (key)
-	{
-	case VK_SPACE:      return "space";
-	case VK_LEFT:       return "up";
-	case VK_RIGHT:      return "right";
-	case VK_UP:         return "up";
-	case VK_DOWN:       return "down";
-	}
+    switch (key)
+    {
+    case VK_SPACE:      return "space";
+    case VK_LEFT:       return "up";
+    case VK_RIGHT:      return "right";
+    case VK_UP:         return "up";
+    case VK_DOWN:       return "down";
+    }
 
-	return 0;
+    return 0;
 }
 
 static void key_down(int key)
 {
-	g_held_keys[key] = 1;
+    g_held_keys[key] = 1;
 
-	if (key == VK_ESCAPE)
-	{
-		CloseWindow(g_window_handle);
-		g_window_closed = 1;
-	}
+    if (key == VK_ESCAPE)
+    {
+        CloseWindow(g_window_handle);
+        g_window_closed = 1;
+    }
 }
 
 static void key_up(int key)
 {
-	g_held_keys[key] = 0;
+    g_held_keys[key] = 0;
 }
 
 static LRESULT CALLBACK window_proc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
@@ -186,49 +186,49 @@ static LRESULT CALLBACK window_proc(HWND hwnd, UINT message, WPARAM wparam, LPAR
     {
     case WM_SIZE:
         set_window_size(LOWORD(lparam), HIWORD(lparam));
-		return 0;
-	case WM_KEYDOWN:
-		key_down(wparam);
-		return 0;
-	case WM_KEYUP:
-		key_up(wparam);
-		return 0;
-	case WM_LBUTTONDOWN:
-	{
-		int x = LOWORD(lparam);
-		int y = HIWORD(lparam);
-		g_mouse_x = x;
-		g_mouse_y = y;
-		g_mouse_left_down = 1;
-		return 0;
-	}
-	case WM_LBUTTONUP:
-	{
-		int x = LOWORD(lparam);
-		int y = HIWORD(lparam);
-		g_mouse_x = x;
-		g_mouse_y = y;
-		g_mouse_left_down = 0;
-		return 0;
-	}
-	case WM_RBUTTONDOWN:
-	{
-		int x = LOWORD(lparam);
-		int y = HIWORD(lparam);
-		g_mouse_x = x;
-		g_mouse_y = y;
-		g_mouse_right_down = 1;
-		return 0;
-	}
-	case WM_RBUTTONUP:
-	{
-		int x = LOWORD(lparam);
-		int y = HIWORD(lparam);
-		g_mouse_x = x;
-		g_mouse_y = y;
-		g_mouse_right_down = 0;
-		return 0;
-	}
+        return 0;
+    case WM_KEYDOWN:
+        key_down(wparam);
+        return 0;
+    case WM_KEYUP:
+        key_up(wparam);
+        return 0;
+    case WM_LBUTTONDOWN:
+    {
+        int x = LOWORD(lparam);
+        int y = HIWORD(lparam);
+        g_mouse_x = x;
+        g_mouse_y = y;
+        g_mouse_left_down = 1;
+        return 0;
+    }
+    case WM_LBUTTONUP:
+    {
+        int x = LOWORD(lparam);
+        int y = HIWORD(lparam);
+        g_mouse_x = x;
+        g_mouse_y = y;
+        g_mouse_left_down = 0;
+        return 0;
+    }
+    case WM_RBUTTONDOWN:
+    {
+        int x = LOWORD(lparam);
+        int y = HIWORD(lparam);
+        g_mouse_x = x;
+        g_mouse_y = y;
+        g_mouse_right_down = 1;
+        return 0;
+    }
+    case WM_RBUTTONUP:
+    {
+        int x = LOWORD(lparam);
+        int y = HIWORD(lparam);
+        g_mouse_x = x;
+        g_mouse_y = y;
+        g_mouse_right_down = 0;
+        return 0;
+    }
     default:
         return DefWindowProc(hwnd, message, wparam, lparam);
     }
@@ -236,7 +236,7 @@ static LRESULT CALLBACK window_proc(HWND hwnd, UINT message, WPARAM wparam, LPAR
 
 static void init(const char* window_title, unsigned window_width, unsigned window_height, int fullscreen)
 {
-	g_window_closed = 0;
+    g_window_closed = 0;
     HINSTANCE h = GetModuleHandle(NULL);
     WNDCLASS wc = {0};    
     GLuint vao;
@@ -265,17 +265,17 @@ static void init(const char* window_title, unsigned window_width, unsigned windo
         0, 0, 0
     };
 
-	mat_ident(g_view_matrix);
-	g_mouse_x = 0;
-	g_mouse_y = 0;
-	g_mouse_left_down = 0;
-	g_mouse_right_down = 0;
-	memset(g_held_keys, 0, sizeof(g_held_keys));
+    mat_ident(g_view_matrix);
+    g_mouse_x = 0;
+    g_mouse_y = 0;
+    g_mouse_left_down = 0;
+    g_mouse_right_down = 0;
+    memset(g_held_keys, 0, sizeof(g_held_keys));
     memset(g_free_shapes, 1, sizeof(g_free_shapes));
     wc.hInstance = h;
     wc.lpfnWndProc = window_proc;
     wc.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);
-	wc.lpszClassName = window_title;
+    wc.lpszClassName = window_title;
     wc.style = CS_OWNDC;
     RegisterClass(&wc);
     g_window_handle = CreateWindow(window_title, window_title, WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, window_width + 2 * h_border_thickness,window_height + 2 * v_border_thickness + caption_thickness, 0, 0, h, 0);
@@ -294,39 +294,39 @@ static void init(const char* window_title, unsigned window_width, unsigned windo
     LoadedFile fragment_shader = load_file("fragment_shader.glsl");
     assert(fragment_shader.loaded);
     g_shader = load_shader(vertex_shader.data, fragment_shader.data);
-	free(vertex_shader.data);
-	free(fragment_shader.data);
-	assert(glIsProgram(g_shader));
+    free(vertex_shader.data);
+    free(fragment_shader.data);
+    assert(glIsProgram(g_shader));
     g_model_view_projection_matrix_location = glGetUniformLocation(g_shader, "model_view_projection_matrix");
     set_window_size(window_width, window_height);
-	wglGetProcAddress("wglSwapIntervalEXT")(-1);
+    wglGetProcAddress("wglSwapIntervalEXT")(-1);
 
-	if (fullscreen)
-	{
-		DEVMODE settings;
-		memset(&settings, 0, sizeof(settings));
-		settings.dmSize = sizeof(settings);
-		settings.dmPelsWidth = window_width;
-		settings.dmPelsHeight = window_height;
-		settings.dmBitsPerPel = 32;
-		settings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-		ChangeDisplaySettings(&settings, CDS_FULLSCREEN);
+    if (fullscreen)
+    {
+        DEVMODE settings;
+        memset(&settings, 0, sizeof(settings));
+        settings.dmSize = sizeof(settings);
+        settings.dmPelsWidth = window_width;
+        settings.dmPelsHeight = window_height;
+        settings.dmBitsPerPel = 32;
+        settings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+        ChangeDisplaySettings(&settings, CDS_FULLSCREEN);
 
-		LONG ex_style = GetWindowLong(g_window_handle, GWL_EXSTYLE);
-		LONG style = GetWindowLong(g_window_handle, GWL_STYLE);
+        LONG ex_style = GetWindowLong(g_window_handle, GWL_EXSTYLE);
+        LONG style = GetWindowLong(g_window_handle, GWL_STYLE);
 
-		ex_style &= ~(WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE);
-		style &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
+        ex_style &= ~(WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE);
+        style &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
 
-		SetWindowLong(g_window_handle, GWL_EXSTYLE, ex_style);
-		SetWindowLong(g_window_handle, GWL_STYLE, style);
+        SetWindowLong(g_window_handle, GWL_EXSTYLE, ex_style);
+        SetWindowLong(g_window_handle, GWL_STYLE, style);
 
-		SetWindowPos(g_window_handle,
-			0,
-			0, 0,
-			window_width, window_height,
-			SWP_NOZORDER | SWP_FRAMECHANGED);
-	}
+        SetWindowPos(g_window_handle,
+            0,
+            0, 0,
+            window_width, window_height,
+            SWP_NOZORDER | SWP_FRAMECHANGED);
+    }
 }
 
 static void deinit()
@@ -347,7 +347,7 @@ static void process_events()
 
 static void clear(float r, float g, float b)
 {
-	glClearColor(r, g, b, 1.0f);
+    glClearColor(r, g, b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -414,23 +414,23 @@ static void draw_shape(Handle handle, float x, float y)
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, floats_per_vertex * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, floats_per_vertex * sizeof(float), (void*)(2 * sizeof(float)));
-	static float model_view_projection_matrix[16];
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, floats_per_vertex * sizeof(float), (void*)(2 * sizeof(float)));
+    static float model_view_projection_matrix[16];
     static float model_view_matrix[16];
     static float model_matrix[16];
     mat_ident(model_matrix);
     model_matrix[12] = x;
     model_matrix[13] = y;
-	mat_mul(model_matrix, g_view_matrix, model_view_matrix);
-	mat_mul(model_view_matrix, g_projection_matrix, model_view_projection_matrix);
-	glUniformMatrix4fv(g_model_view_projection_matrix_location, 1, GL_FALSE, model_view_projection_matrix);
+    mat_mul(model_matrix, g_view_matrix, model_view_matrix);
+    mat_mul(model_view_matrix, g_projection_matrix, model_view_projection_matrix);
+    glUniformMatrix4fv(g_model_view_projection_matrix_location, 1, GL_FALSE, model_view_projection_matrix);
     glDrawArrays(GL_TRIANGLE_FAN, 0, shape->count);
 }
 
 static void move_view(float x, float y)
 {
-	g_view_matrix[12] -= x;
-	g_view_matrix[13] -= y;
+    g_view_matrix[12] -= x;
+    g_view_matrix[13] -= y;
 }
 
 //////
@@ -445,10 +445,10 @@ static int pvx_init(lua_State* L)
 {
     const char* window_title = luaL_checkstring(L, 1);
     unsigned window_width = (unsigned)luaL_checknumber(L, 2);
-	unsigned window_height = (unsigned)luaL_checknumber(L, 3);
-	int fullscreen = (unsigned)luaL_checkinteger(L, 4);
-	init(window_title, window_width, window_height, fullscreen);
-	lua_pop(L, 4);
+    unsigned window_height = (unsigned)luaL_checknumber(L, 3);
+    int fullscreen = (unsigned)luaL_checkinteger(L, 4);
+    init(window_title, window_width, window_height, fullscreen);
+    lua_pop(L, 4);
     return 0;
 }
 
@@ -496,7 +496,7 @@ static int pvx_add_shape(lua_State* L)
         lua_pop(L, 1);
     }
 
-	lua_pop(L, 4);
+    lua_pop(L, 4);
     lua_pushnumber(L, add_shape(verts, n / 2));
     return 1;
 }
@@ -504,19 +504,19 @@ static int pvx_add_shape(lua_State* L)
 static int pvx_draw_shape(lua_State* L)
 {
     unsigned handle = luaL_checkint(L, 1);
-	float x = (float)luaL_checknumber(L, 2);
-	float y = (float)luaL_checknumber(L, 3);
-	lua_pop(L, 3);
+    float x = (float)luaL_checknumber(L, 2);
+    float y = (float)luaL_checknumber(L, 3);
+    lua_pop(L, 3);
     draw_shape(handle, x, y);
     return 0;
 }
 
 static int pvx_clear(lua_State* L)
 {
-	float r = (float)luaL_checknumber(L, 1);
-	float g = (float)luaL_checknumber(L, 2);
-	float b = (float)luaL_checknumber(L, 3);
-	lua_pop(L, 3);
+    float r = (float)luaL_checknumber(L, 1);
+    float g = (float)luaL_checknumber(L, 2);
+    float b = (float)luaL_checknumber(L, 3);
+    lua_pop(L, 3);
     clear(r, g, b);
     return 0;
 }
@@ -529,57 +529,57 @@ static int pvx_flip(lua_State* L)
 
 static int pvx_key_held(lua_State* L)
 {
-	const char* key = luaL_checkstring(L, 1);
-	lua_pop(L, 1);
-	lua_pushboolean(L, g_held_keys[key_index_from_name(key)]);
-	return 1;
+    const char* key = luaL_checkstring(L, 1);
+    lua_pop(L, 1);
+    lua_pushboolean(L, g_held_keys[key_index_from_name(key)]);
+    return 1;
 }
 
 static int pvx_move_view(lua_State* L)
 {
-	float x = (float)luaL_checknumber(L, 1);
-	float y = (float)luaL_checknumber(L, 2);
-	lua_pop(L, 2);
-	move_view(x, y);
-	return 0;
+    float x = (float)luaL_checknumber(L, 1);
+    float y = (float)luaL_checknumber(L, 2);
+    lua_pop(L, 2);
+    move_view(x, y);
+    return 0;
 }
 
 static int pvx_view_pos(lua_State* L)
 {
-	lua_pushnumber(L, -g_view_matrix[12]);
-	lua_pushnumber(L, -g_view_matrix[13]);
-	return 2;
+    lua_pushnumber(L, -g_view_matrix[12]);
+    lua_pushnumber(L, -g_view_matrix[13]);
+    return 2;
 }
 
 static int pvx_mouse_pos(lua_State* L)
 {
-	lua_pushnumber(L, g_mouse_x);
-	lua_pushnumber(L, g_mouse_y);
-	return 2;
+    lua_pushnumber(L, g_mouse_x);
+    lua_pushnumber(L, g_mouse_y);
+    return 2;
 }
 
 static int pvx_left_mouse_held(lua_State* L)
 {
-	lua_pushboolean(L, g_mouse_left_down);
-	return 1;
+    lua_pushboolean(L, g_mouse_left_down);
+    return 1;
 }
 
 static int pvx_right_mouse_held(lua_State* L)
 {
-	lua_pushboolean(L, g_mouse_right_down);
-	return 1;
+    lua_pushboolean(L, g_mouse_right_down);
+    return 1;
 }
 
 static int pvx_window_size(lua_State* L)
 {
-	lua_pushnumber(L, g_window_width);
-	lua_pushnumber(L, g_window_height);
-	return 2;
+    lua_pushnumber(L, g_window_width);
+    lua_pushnumber(L, g_window_height);
+    return 2;
 }
 
 int __declspec(dllexport) pvx_load(lua_State* L)
 {
-	g_lua_state = L;
+    g_lua_state = L;
     lua_register(L, "pvx_init", pvx_init);
     lua_register(L, "pvx_deinit", pvx_deinit);
     lua_register(L, "pvx_process_events", pvx_process_events);
@@ -587,13 +587,13 @@ int __declspec(dllexport) pvx_load(lua_State* L)
     lua_register(L, "pvx_add_shape", pvx_add_shape);
     lua_register(L, "pvx_draw_shape", pvx_draw_shape);
     lua_register(L, "pvx_clear", pvx_clear);
-	lua_register(L, "pvx_flip", pvx_flip);
-	lua_register(L, "pvx_key_held", pvx_key_held);
-	lua_register(L, "pvx_move_view", pvx_move_view);
-	lua_register(L, "pvx_view_pos", pvx_view_pos);
-	lua_register(L, "pvx_mouse_pos", pvx_mouse_pos);
-	lua_register(L, "pvx_window_size", pvx_window_size);
-	lua_register(L, "pvx_left_mouse_held", pvx_left_mouse_held);
-	lua_register(L, "pvx_right_mouse_held", pvx_right_mouse_held);
+    lua_register(L, "pvx_flip", pvx_flip);
+    lua_register(L, "pvx_key_held", pvx_key_held);
+    lua_register(L, "pvx_move_view", pvx_move_view);
+    lua_register(L, "pvx_view_pos", pvx_view_pos);
+    lua_register(L, "pvx_mouse_pos", pvx_mouse_pos);
+    lua_register(L, "pvx_window_size", pvx_window_size);
+    lua_register(L, "pvx_left_mouse_held", pvx_left_mouse_held);
+    lua_register(L, "pvx_right_mouse_held", pvx_right_mouse_held);
     return 0;
 }
