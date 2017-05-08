@@ -1,5 +1,5 @@
 # pvx
-This library can be used to draw simple, colored shapes from lua. It is a minimalistic C lib. It was made for my game "KOFFERT", which is available here: https://github.com/KarlZylinski/town
+This library can be used to draw simple, colored shapes from lua. It is a minimalistic C lib. It was made for my game "KOFFERT", which is available here: https://github.com/karl-zylinski/town
 
 You load it like so:
 ```package.loadlib("pvx.dll", "pvx_load")()```
